@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="stanford.hackathon.joggers" >
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <application
+        android:name="stanford.hackathon.joggers.StorageApplication"
+        android:allowBackup="true"
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme" >
+        <activity
+            android:name="stanford.hackathon.joggers.MainActivity"
+            android:label="@string/app_name" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="stanford.hackathon.joggers.ContainersActivity"
+            android:label="@string/title_activity_containers"
+            android:parentActivityName="stanford.hackathon.joggers.MainActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="stanford.hackathon.joggers.MainActivity" />
+
+            <intent-filter>
+                <action android:name="containers.loaded" >
+                </action>
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="stanford.hackathon.joggers.BlobsActivity"
+            android:label="@string/title_activity_blobs"
+            android:parentActivityName="stanford.hackathon.joggers.ContainersActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="stanford.hackathon.joggers.ContainersActivity" />
+
+            <intent-filter>
+                <action android:name="blobs.loaded" >
+                </action>
+                <action android:name="blob.created" >
+                </action>
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="stanford.hackathon.joggers.BlobDetailsActivity"
+            android:label="@string/title_activity_blob_details"
+            android:parentActivityName="stanford.hackathon.joggers.BlobsActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="stanford.hackathon.joggers.BlobsActivity" />
+
+            <intent-filter>
+                <action android:name="blob.loaded" >
+                </action>
+            </intent-filter>
+        </activity>
+    </application>
+    </manifest>

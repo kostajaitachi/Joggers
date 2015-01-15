@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Joggers</string>
+    <string name="action_settings">Settings</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="table_storage">Client-Side Storage</string>
+    <string name="blob_storage">Server-Side Storage</string>
+    <string name="launch_screen_info">Which type of storage do you want to work with:Server-Side deals with Blobs and Containers in Azure on server side, while Client-side uses Dropbox storage on client-side?</string>
+    <string name="title_activity_containers">PlaylistActivity</string>
+    <string name="title_activity_blobs">SongsActivity</string>
+    <string name="create">Create</string>
+    <string name="cancel">Cancel</string>
+    <string name="add_container">Add Playlist</string>
+    <string name="container_name">Playlist Name:</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="is_public">Is Public:</string>
+    <string name="add_blob">Add Song</string>
+    <string name="title_activity_blob_details">SongDetailsActivity</string>
+    <string name="blob_name">Song Name:</string>
+    <string name="url">URL:</string>
+    <string name="content_type">Content-Type:</string>
+   	<string name="load_with_sas">Load with SAS</string>
+   	<string name="select_image">Select Image</string>
+   	<string name="create_with_sas">Create Blob with SAS</string>
+
+</resources>
