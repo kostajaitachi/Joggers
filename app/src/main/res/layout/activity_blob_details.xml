@@ -87,19 +87,19 @@
         android:layout_alignLeft="@+id/relativeLayout3"
         android:layout_below="@+id/relativeLayout3" >
 
-        <Button
-            android:id="@+id/btnLoadWithSas"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:text="@string/load_with_sas" />
+        <!-- <Button
+             android:id="@+id/btnLoadWithSas"
+             android:layout_width="wrap_content"
+             android:layout_height="wrap_content"
+             android:layout_alignParentRight="true"
+             android:text="@string/load_with_sas" />
 
-        <ImageView
-            android:id="@+id/imgBlobImage"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/btnLoadWithSas" />
-
+         <ImageView
+             android:id="@+id/imgBlobImage"
+             android:layout_width="wrap_content"
+             android:layout_height="wrap_content"
+             android:layout_below="@id/btnLoadWithSas" />
+ -->
     </RelativeLayout>
 
 </RelativeLayout>

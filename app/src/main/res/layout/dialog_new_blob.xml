@@ -8,25 +8,14 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content" >
 
-        <EditText
+        <TextView
             android:id="@+id/txtBlobName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_alignParentTop="true"
             android:ems="10" >
-
-            <requestFocus />
-        </EditText>
-
-        <TextView
-            android:id="@+id/lblBlobName"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_centerVertical="true"
-            android:text="@string/blob_name" />
-
+        </TextView>
     </RelativeLayout>
 
     <Button
@@ -36,10 +25,5 @@
         android:layout_gravity="center_horizontal"
         android:text="@string/select_image" />
 
-    <ImageView
-        android:id="@+id/imgBlobImage"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal" />
 
 </LinearLayout>

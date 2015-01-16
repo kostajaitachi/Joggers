@@ -48,11 +48,8 @@ public class BlobDetailsActivity extends Activity {
 		mContainerName = launchIntent.getStringExtra("ContainerName");
 		mBlobName = launchIntent.getStringExtra("BlobName");
 		mBlobPosition = launchIntent.getIntExtra("BlobPosition", -1);		
-		
-		//Get UI controls
-		mImgBlobImage = (ImageView) findViewById(R.id.imgBlobImage);
-		
-		Button btnLoadWithSas = (Button) findViewById(R.id.btnLoadWithSas);
+
+		/*Button btnLoadWithSas = (Button) findViewById(R.id.btnLoadWithSas);
 		btnLoadWithSas.setOnClickListener(new OnClickListener() {			
 			@Override
 			public void onClick(View v) {
@@ -60,7 +57,7 @@ public class BlobDetailsActivity extends Activity {
 				//and then display it
 				mStorageService.getBlobSas(mContainerName, mBlobName);
 			}
-		});
+		});*/
 
 		Set<Entry<String, JsonElement>> set = mStorageService.getLoadedBlobObjects()[mBlobPosition].getAsJsonObject().entrySet();
 		String url = "";
@@ -84,12 +81,8 @@ public class BlobDetailsActivity extends Activity {
 				lblContentTypeValue.setText(contentType);
 			}					
 		}
-		//If it's an image, attempt to grab it
-		if (contentType.equals("image/jpeg")) {			
-			(new ImageFetcherTask(url)).execute();
-		}
 	}
-	
+
 	//This class specifically handles fetching an image from a URL and setting
 	//the image view source on the screen
 	private class ImageFetcherTask extends AsyncTask<Void, Void, Boolean> {
@@ -103,12 +96,12 @@ public class BlobDetailsActivity extends Activity {
 	    @Override
 	    protected Boolean doInBackground(Void... params) {
 	        try {
-			  mBitmap = BitmapFactory.decodeStream((InputStream)new URL(mUrl).getContent()); 					
+			  mBitmap = BitmapFactory.decodeStream((InputStream)new URL(mUrl).getContent());
 	        } catch (Exception e) {
 	        	Log.e(TAG, e.getMessage());
 	        	return false;
 	        }
-	        return true;	    	
+	        return true;
 	    }
 
 	    /***

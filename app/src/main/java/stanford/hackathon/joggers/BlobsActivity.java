@@ -5,22 +5,30 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.FileInputStream;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 import java.util.Map;
 
 import com.google.gson.JsonObject;
+import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
+import com.microsoft.windowsazure.mobileservices.ServiceFilterResponse;
+import com.microsoft.windowsazure.mobileservices.TableOperationCallback;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ListActivity;
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -44,6 +52,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class BlobsActivity extends ListActivity {
 	private Context mContext;
@@ -53,8 +62,7 @@ public class BlobsActivity extends ListActivity {
 	private int mSelectedBlobPosition;
 	private String mContainerName;
 	private Button btnPositiveDialog;
-	private EditText mTxtBlobName;
-	private ImageView mImgBlobImage;
+	private TextView mTxtBlobName;
 	private Uri mImageUri;
 	private AlertDialog mAlertDialog;
 	
@@ -136,15 +144,15 @@ public class BlobsActivity extends ListActivity {
 			NavUtils.navigateUpFromSameTask(this);
 			return true;
 		case R.id.action_add_blob:
+
 		      //Show new table dialog
 			AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
             // Get the layout inflater
             LayoutInflater inflater = ((Activity) mContext).getLayoutInflater();
             //Create our dialog view
             View dialogView = inflater.inflate(R.layout.dialog_new_blob, null);
-            mTxtBlobName = (EditText) dialogView.findViewById(R.id.txtBlobName);            
+            mTxtBlobName = (TextView) dialogView.findViewById(R.id.txtBlobName);
             final Button btnSelectImage = (Button) dialogView.findViewById(R.id.btnSelectImage);
-            mImgBlobImage = (ImageView) dialogView.findViewById(R.id.imgBlobImage);            
             //Set select image handler
             btnSelectImage.setOnClickListener(new OnClickListener() {				
 				@Override
@@ -219,7 +227,7 @@ public class BlobsActivity extends ListActivity {
 				JsonObject blob = mStorageService.getLoadedBlob();
 				String sasUrl = blob.getAsJsonPrimitive("sasUrl").toString();				
 				(new MusicUploaderTask(sasUrl)).execute();
-			}			
+			}
 		}
 	};
 	
@@ -275,12 +283,15 @@ public class BlobsActivity extends ListActivity {
  	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
  		super.onActivityResult(requestCode, resultCode, data);
  		try {
- 			//handle result from gallary select
+ 			//handle result from gallery select
  			if (requestCode == 1111) {
  				Uri currImageURI = data.getData();
  				mImageUri = currImageURI;
- 				//Set the image view's image by using imageUri
- 				mImgBlobImage.setImageURI(currImageURI);
+                Cursor cursor = getContentResolver().query(mImageUri, null,null, null, null);
+                cursor.moveToFirst();
+                String title = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DISPLAY_NAME));
+                title=title.substring(0,title.length()-4);
+                mTxtBlobName.setText(title);
  			}
  		} catch (Exception ex) {
  			Log.e(TAG, ex.getMessage());
@@ -292,16 +303,35 @@ public class BlobsActivity extends ListActivity {
  	 */
  	class MusicUploaderTask extends AsyncTask<Void, Void, Boolean> {
 	    private String mUrl;
+        double latitude, longitude;
+        String title="Hello";
+        private final ProgressDialog dialog = new ProgressDialog(BlobsActivity.this);
 	    public MusicUploaderTask(String url) {
 	    	mUrl = url;
 	    }
         @Override
+        protected void onPreExecute(){
+            dialog.setMessage("Uploading the song. Please wait.");
+            dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+            dialog.setCancelable(true);
+            dialog.setCanceledOnTouchOutside(false);
+            dialog.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.dismiss();
+                }
+            });
+            dialog.show();
+        }
+        @Override
 	    protected Boolean doInBackground(Void... params) {	         
 	    	try {
-	    		//Get the image data
 		    	Cursor cursor = getContentResolver().query(mImageUri, null,null, null, null);
-				cursor.moveToFirst();
-				int index = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
+				cursor.moveToFirst();int index=0;
+				index = cursor.getColumnIndex(MediaStore.Images.Media.DATA);
+                title = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DISPLAY_NAME));
+                title=title.substring(0,title.length()-4);
+                dialog.setMessage("Uploading "+title);
 				String absoluteFilePath = cursor.getString(index);
 				FileInputStream fis = new FileInputStream(absoluteFilePath);
 				int bytesRead = 0;
@@ -324,23 +354,58 @@ public class BlobsActivity extends ListActivity {
 				wr.flush();
 				wr.close();
 				int response = urlConnection.getResponseCode();
+                System.out.println("response"+response);
 				//If we successfully uploaded, return true
-				if (response == 201
-						&& urlConnection.getResponseMessage().equals("Created")) {
-					return true;
-				}
+				//if (response == 201){
+						//&& urlConnection.getResponseMessage().equals("Created")) {
+
+                    return true;
+				//}
 	    	} catch (Exception ex) {
 	    		Log.e(TAG, ex.getMessage());
 	    	}
+
 	        return false;	    	
 	    }
-
+        private void getLocation()
+        {
+            AppLocationService appLocationService = new AppLocationService(BlobsActivity.this);
+            Location location = appLocationService.getLocation(LocationManager.NETWORK_PROVIDER);
+            if(location==null)location=appLocationService.getLocation(LocationManager.GPS_PROVIDER);
+            if(location==null)location=appLocationService.getLocation(LocationManager.PASSIVE_PROVIDER);
+            if (location != null) {
+                latitude = location.getLatitude();
+                longitude = location.getLongitude();
+            } else {
+                latitude = 78.34;
+                longitude = 17.23;
+            }
+            System.out.println("lat"+latitude);
+        }
 	    @Override
 	    protected void onPostExecute(Boolean uploaded) {
-	        if (uploaded) {
-	        	mAlertDialog.cancel();
+            if (dialog.isShowing()) dialog.dismiss();
+            getLocation();
+            Item item = new Item();
+            item.Title = title;
+            item.lat = latitude;
+            item.lon = longitude;
+            try {
+                MobileServiceClient mClient = new MobileServiceClient("https://joggers.azure-mobile.net/", "xNuXCWcFCMzhHBjAgncgVRppUyVONF71", getApplicationContext());
+                mClient.getTable(Item.class).insert(item, new TableOperationCallback<Item>() {
+                    public void onCompleted(Item entity, Exception exception, ServiceFilterResponse response) {
+                        if (exception == null) {System.out.println("Success");
+                        } else {System.out.println("Nope"+exception);
+                        }
+                    }
+                });
+            } catch (MalformedURLException e) {
+                Log.e(TAG, "There was an error creating the Mobile Service. Verify the URL");
+            }
+            	mAlertDialog.cancel();
 	        	mStorageService.getBlobsForContainer(mContainerName);
-	        }
-	    }
-	}
+        Toast.makeText(getApplicationContext(),"Song uploaded!",Toast.LENGTH_LONG).show();}
+
+
+    }
 }
