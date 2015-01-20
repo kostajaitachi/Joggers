@@ -1,6 +1,10 @@
 package stanford.hackathon.joggers;
 
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URL;
 import java.util.Set;
 import java.util.Map.Entry;
@@ -8,6 +12,8 @@ import java.util.Map.Entry;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
+import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.Activity;
@@ -32,7 +38,6 @@ public class BlobDetailsActivity extends Activity {
 	private String mBlobName;
 	private int mBlobPosition;
 	private StorageService mStorageService;
-	private ImageView mImgBlobImage;;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -82,13 +87,28 @@ public class BlobDetailsActivity extends Activity {
 			}					
 		}
 	}
-
+    public void downloadSong(View v) {
+        mStorageService.getBlobSas(mContainerName, mBlobName);
+    }
 	//This class specifically handles fetching an image from a URL and setting
 	//the image view source on the screen
-	private class ImageFetcherTask extends AsyncTask<Void, Void, Boolean> {
+	private class ImageFetcherTask extends AsyncTask<Void, Integer, Boolean> {
 	    private String mUrl;
-	    private Bitmap mBitmap;
-
+        private final ProgressDialog dialog = new ProgressDialog(BlobDetailsActivity.this);
+        @Override
+        protected void onPreExecute(){
+            dialog.setMessage("Downloading the song. Please wait.");
+            dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+            dialog.setCancelable(true);
+            dialog.setCanceledOnTouchOutside(false);
+            dialog.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.dismiss();
+                }
+            });
+            dialog.show();
+        }
 	    public ImageFetcherTask(String url) {
 	        mUrl = url;
 	    }
@@ -96,22 +116,51 @@ public class BlobDetailsActivity extends Activity {
 	    @Override
 	    protected Boolean doInBackground(Void... params) {
 	        try {
-			  mBitmap = BitmapFactory.decodeStream((InputStream)new URL(mUrl).getContent());
+                try {
+                    System.out.println(mUrl);
+                    System.out.println("Folders:"+mContainerName);
+                    System.out.println("Files:"+mBlobName);
+                    File cacheDir = new File(android.os.Environment.getExternalStorageDirectory(), "Joggers/"+mContainerName);
+                    if (!cacheDir.exists())
+                        cacheDir.mkdirs();
+
+                    File f = new File(cacheDir,mBlobName + ".mp3");
+                    URL url = new URL(mUrl);
+
+                    InputStream input = new BufferedInputStream(url.openStream());
+                    OutputStream output = new FileOutputStream(f);
+
+                    byte data[] = new byte[1024];
+                    long total = 0;
+                    int count = 0;
+                    while ((count = input.read(data)) != -1) {
+                        total++;
+                        Log.e("while", "#"+count+"A" + total);
+                        publishProgress((int)total/count);
+                        output.write(data, 0, count);
+                    }
+                    output.flush();
+                    output.close();
+                    input.close();
+                }
+                catch(Exception e) {
+                    e.printStackTrace();
+                }
 	        } catch (Exception e) {
 	        	Log.e(TAG, e.getMessage());
 	        	return false;
 	        }
 	        return true;
 	    }
-
+        protected void onProgressUpdate(Integer... progress) {
+            dialog.setProgress(progress[0]);
+        }
 	    /***
 	     * If the image was loaded successfully, set the image view
 	     */
 	    @Override
 	    protected void onPostExecute(Boolean loaded) {
-	        if (loaded) {
-	        	mImgBlobImage.setImageBitmap(mBitmap);
-	        }
+            if (dialog.isShowing()) dialog.dismiss();
 	    }
 	}
 

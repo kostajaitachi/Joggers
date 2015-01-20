@@ -7,6 +7,7 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ListActivity;
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -34,7 +35,7 @@ public class ContainersActivity extends ListActivity {
 	private StorageService mStorageService;
 	private ActionMode mActionMode;
 	private int mSelectedContainerPosition;
-	
+    private ProgressDialog dialog;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -45,6 +46,18 @@ public class ContainersActivity extends ListActivity {
 		mStorageService = myApp.getStorageService();
 				
 		mContext = this;
+        dialog = new ProgressDialog(ContainersActivity.this);
+        dialog.setMessage("Getting all the playlist. Please wait.");
+        dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        dialog.setCancelable(true);
+        dialog.setCanceledOnTouchOutside(false);
+        dialog.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        dialog.show();
 		//Start getting the containers
 		mStorageService.getContainers();
 		
@@ -170,7 +183,8 @@ public class ContainersActivity extends ListActivity {
 			}			
 			ArrayAdapter<String> listAdapter = new ArrayAdapter<String>(mContext,
 	                android.R.layout.simple_list_item_1, strContainers);
-			setListAdapter(listAdapter);				
+			setListAdapter(listAdapter);
+            if (dialog.isShowing()) dialog.dismiss();
 		}
 	};
 	

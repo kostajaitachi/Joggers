@@ -65,7 +65,7 @@ public class BlobsActivity extends ListActivity {
 	private TextView mTxtBlobName;
 	private Uri mImageUri;
 	private AlertDialog mAlertDialog;
-	
+    private  ProgressDialog dialog;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -79,6 +79,19 @@ public class BlobsActivity extends ListActivity {
 		mContainerName = launchIntent.getStringExtra("ContainerName");
 				
 		mContext = this;
+        dialog = new ProgressDialog(BlobsActivity.this);
+        dialog.setMessage("Getting the songs in this playlist. Please wait.");
+        dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        dialog.setCancelable(true);
+        dialog.setCanceledOnTouchOutside(false);
+        dialog.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        dialog.show();
+
 		//Get the blobs for the selected container
 		mStorageService.getBlobsForContainer(mContainerName);		
 		
@@ -228,6 +241,7 @@ public class BlobsActivity extends ListActivity {
 				String sasUrl = blob.getAsJsonPrimitive("sasUrl").toString();				
 				(new MusicUploaderTask(sasUrl)).execute();
 			}
+            if (dialog.isShowing()) dialog.dismiss();
 		}
 	};
 	
@@ -385,27 +399,32 @@ public class BlobsActivity extends ListActivity {
 	    @Override
 	    protected void onPostExecute(Boolean uploaded) {
             if (dialog.isShowing()) dialog.dismiss();
-            getLocation();
-            Item item = new Item();
-            item.Title = title;
-            item.lat = latitude;
-            item.lon = longitude;
-            try {
-                MobileServiceClient mClient = new MobileServiceClient("https://joggers.azure-mobile.net/", "xNuXCWcFCMzhHBjAgncgVRppUyVONF71", getApplicationContext());
-                mClient.getTable(Item.class).insert(item, new TableOperationCallback<Item>() {
-                    public void onCompleted(Item entity, Exception exception, ServiceFilterResponse response) {
-                        if (exception == null) {System.out.println("Success");
-                        } else {System.out.println("Nope"+exception);
+            if (uploaded) {
+                getLocation();
+                Item item = new Item();
+                item.Title = title;
+                item.lat = latitude;
+                item.lon = longitude;
+                try {
+                    MobileServiceClient mClient = new MobileServiceClient("https://joggers.azure-mobile.net/", "xNuXCWcFCMzhHBjAgncgVRppUyVONF71", getApplicationContext());
+                    mClient.getTable(Item.class).insert(item, new TableOperationCallback<Item>() {
+                        public void onCompleted(Item entity, Exception exception, ServiceFilterResponse response) {
+                            if (exception == null) {
+                                System.out.println("Success");
+                            } else {
+                                System.out.println("Nope" + exception);
+                            }
                         }
-                    }
-                });
-            } catch (MalformedURLException e) {
-                Log.e(TAG, "There was an error creating the Mobile Service. Verify the URL");
-            }
-            	mAlertDialog.cancel();
-	        	mStorageService.getBlobsForContainer(mContainerName);
-        Toast.makeText(getApplicationContext(),"Song uploaded!",Toast.LENGTH_LONG).show();}
-
+                    });
+                } catch (MalformedURLException e) {
+                    Log.e(TAG, "There was an error creating the Mobile Service. Verify the URL");
+                }
+                mAlertDialog.cancel();
+                mStorageService.getBlobsForContainer(mContainerName);
+                Toast.makeText(getApplicationContext(), "Song uploaded!", Toast.LENGTH_LONG).show();
+            } else
+                Toast.makeText(getApplicationContext(), "Song couldn't uploaded!", Toast.LENGTH_LONG).show();
+        }
 
     }
 }
