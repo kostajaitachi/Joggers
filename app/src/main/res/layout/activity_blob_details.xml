@@ -6,12 +6,14 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
+    android:background="@drawable/back"
     tools:context=".BlobDetailsActivity" >
 
-    <RelativeLayout
+    <LinearLayout
         android:id="@+id/RelativeLayout1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:orientation="vertical"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true" >
 
@@ -20,6 +22,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
+            android:textSize="20sp"
             android:layout_alignParentTop="true"
             android:text="@string/blob_name" />
 
@@ -30,14 +33,16 @@
             android:layout_alignBaseline="@+id/lblBlobName"
             android:layout_alignParentRight="true"
             android:layout_alignParentTop="true"
+            android:textSize="20sp"
             android:text="TextView" />
-    </RelativeLayout>
+    </LinearLayout>
 
-    <RelativeLayout
+    <LinearLayout
         android:id="@+id/relativeLayout2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
+        android:orientation="vertical"
         android:layout_below="@+id/RelativeLayout1" >
 
         <TextView
@@ -46,7 +51,8 @@
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_alignParentTop="true"
-            android:text="@string/url" />
+            android:text="@string/url"
+            android:textSize="20sp"/>
 
         <TextView
             android:id="@+id/lblUrlValue"
@@ -55,14 +61,16 @@
             android:layout_alignParentRight="true"
             android:layout_alignParentTop="true"
             android:maxWidth="@dimen/url_max_width"
+            android:textSize="20sp"
             android:text="TextView" />
 
-    </RelativeLayout>
+    </LinearLayout>
 
-    <RelativeLayout
+    <LinearLayout
         android:id="@+id/relativeLayout3"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:orientation="vertical"
         android:layout_alignLeft="@+id/relativeLayout2"
         android:layout_below="@+id/relativeLayout2" >
 
@@ -70,6 +78,7 @@
             android:id="@+id/lblContentType"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textSize="20sp"
             android:text="@string/content_type" />
 
         <TextView
@@ -77,46 +86,20 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
+            android:textSize="20sp"
             android:text="TextView" />
-    </RelativeLayout>
-
-    <RelativeLayout
-        android:id="@+id/relativeLayout4"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/relativeLayout3"
-        android:layout_below="@+id/relativeLayout3" >
-
-        <!-- <Button
-             android:id="@+id/btnLoadWithSas"
-             android:layout_width="wrap_content"
-             android:layout_height="wrap_content"
-             android:layout_alignParentRight="true"
-             android:text="@string/load_with_sas" />
-
-         <ImageView
-             android:id="@+id/imgBlobImage"
-             android:layout_width="wrap_content"
-             android:layout_height="wrap_content"
-             android:layout_below="@id/btnLoadWithSas" />
- -->
-    </RelativeLayout>
-
-    <MediaController
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/mediaController"
-        android:layout_below="@+id/relativeLayout4"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="121dp" />
+    </LinearLayout>
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Download"
         android:id="@+id/btnDownload"
-        android:layout_below="@+id/relativeLayout4"
-        android:layout_centerHorizontal="true"
-        android:onClick="downloadSong"/>
+        android:onClick="downloadSong"
+        android:textSize="30sp"
+        android:layout_marginBottom="124dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
 
 </RelativeLayout>

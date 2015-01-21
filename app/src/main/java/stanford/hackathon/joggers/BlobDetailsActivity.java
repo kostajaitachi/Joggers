@@ -6,14 +6,18 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
+import android.media.MediaPlayer;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.Activity;
@@ -24,13 +28,16 @@ import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class BlobDetailsActivity extends Activity {
 	private final String TAG = "BlobDetailsActivity";
@@ -43,6 +50,7 @@ public class BlobDetailsActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_blob_details);
+
 		// Show the Up button in the action bar.
 		setupActionBar();
 		//Get access to the storage service
@@ -93,7 +101,7 @@ public class BlobDetailsActivity extends Activity {
 	//This class specifically handles fetching an image from a URL and setting
 	//the image view source on the screen
 	private class ImageFetcherTask extends AsyncTask<Void, Integer, Boolean> {
-	    private String mUrl;
+	    private String mUrl,fUrl;
         private final ProgressDialog dialog = new ProgressDialog(BlobDetailsActivity.this);
         @Override
         protected void onPreExecute(){
@@ -123,10 +131,9 @@ public class BlobDetailsActivity extends Activity {
                     File cacheDir = new File(android.os.Environment.getExternalStorageDirectory(), "Joggers/"+mContainerName);
                     if (!cacheDir.exists())
                         cacheDir.mkdirs();
-
+                    fUrl=cacheDir.getAbsolutePath()+mBlobName+".mp3";
                     File f = new File(cacheDir,mBlobName + ".mp3");
                     URL url = new URL(mUrl);
-
                     InputStream input = new BufferedInputStream(url.openStream());
                     OutputStream output = new FileOutputStream(f);
 
@@ -135,8 +142,7 @@ public class BlobDetailsActivity extends Activity {
                     int count = 0;
                     while ((count = input.read(data)) != -1) {
                         total++;
-                        Log.e("while", "#"+count+"A" + total);
-                        publishProgress((int)total/count);
+                        Log.e("while", "#" + count + "A" + total);
                         output.write(data, 0, count);
                     }
                     output.flush();
@@ -152,16 +158,43 @@ public class BlobDetailsActivity extends Activity {
 	        }
 	        return true;
 	    }
-        protected void onProgressUpdate(Integer... progress) {
-            dialog.setProgress(progress[0]);
-        }
 	    /***
 	     * If the image was loaded successfully, set the image view
 	     */
 	    @Override
 	    protected void onPostExecute(Boolean loaded) {
-            if (dialog.isShowing()) dialog.dismiss();
-	    }
+            dialog.dismiss();
+            /*AlertDialog.Builder builder = new AlertDialog.Builder(getApplicationContext());
+            LayoutInflater inflater = ((Activity) getApplicationContext()).getLayoutInflater();
+            View dialogView = inflater.inflate(R.layout.dialog_new_blob, null);
+            final TextView txtBlobName = (TextView) dialogView.findViewById(R.id.txtBlobName);
+            txtBlobName.setText("Do you want to play "+mBlobName+"?");
+            builder.setView(dialogView)
+                    .setPositiveButton("Play", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int id) {
+                            try {
+                                MediaPlayer mMediaPlayer = new MediaPlayer();
+                                mMediaPlayer.setDataSource(fUrl
+                                );
+                                mMediaPlayer.prepare();
+                                mMediaPlayer.start();
+                                dialog.dismiss();
+                            }catch(Exception e){
+                                Toast.makeText(getApplicationContext(),e.toString(),Toast.LENGTH_LONG).show();
+                            }
+                        }
+                    })
+                    .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            dialog.cancel();
+                        }
+                    });
+            //Show the dialog
+            builder.show();*/
+            Toast.makeText(getApplicationContext(), "Song downloaded at Joggers/" + mContainerName + "/" + mBlobName, Toast.LENGTH_LONG).show();
+
+        }
 	}
 
 	/**

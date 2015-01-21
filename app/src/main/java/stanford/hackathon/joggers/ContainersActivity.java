@@ -26,6 +26,7 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.Toast;
 import android.widget.ToggleButton;
 import android.view.View;
 import android.widget.TextView;
@@ -39,6 +40,7 @@ public class ContainersActivity extends ListActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+        getListView().setBackgroundResource(R.drawable.back);
 		// Show the Up button in the action bar.
 		setupActionBar();
 		//Get access to the storage service
@@ -46,6 +48,7 @@ public class ContainersActivity extends ListActivity {
 		mStorageService = myApp.getStorageService();
 				
 		mContext = this;
+
         dialog = new ProgressDialog(ContainersActivity.this);
         dialog.setMessage("Getting all the playlist. Please wait.");
         dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
@@ -58,6 +61,14 @@ public class ContainersActivity extends ListActivity {
             }
         });
         dialog.show();
+        if(strContainers!=null)
+        {
+
+            ArrayAdapter<String> listAdapter = new ArrayAdapter<String>(mContext,
+                    android.R.layout.simple_list_item_1, strContainers);
+            setListAdapter(listAdapter);
+            if (dialog.isShowing()) dialog.dismiss();
+        }
 		//Start getting the containers
 		mStorageService.getContainers();
 		
@@ -133,8 +144,22 @@ public class ContainersActivity extends ListActivity {
                    .setPositiveButton(R.string.create, new DialogInterface.OnClickListener() {
                        @Override
                        public void onClick(DialogInterface dialog, int id) {
-                    	   //When they click OK, add the container
-                    	   mStorageService.addContainer(txtContainerName.getText().toString(), btnIsPublic.isChecked());                          
+                           //When they click OK, add the container
+                           String playlist = txtContainerName.getText().toString();
+                           if (playlist.length() < 3) {
+                               Toast.makeText(getApplicationContext(),"Length of the name should be greater than 3",Toast.LENGTH_LONG).show();
+                           } else {
+                               char ar[] = playlist.toLowerCase().toCharArray();
+                               playlist = "";
+                               for (int i = 0; i < ar.length; i++) {
+                                   if (ar[i] < 90 && ar[i] > 122) ar[i] = '-';
+                                   playlist += ar[i];
+                                   if (i > 60) break;
+                               }
+                               if (playlist.length() < 3) playlist += "jog";
+                               System.out.println("Srujan" + playlist);
+                               mStorageService.addContainer(playlist, btnIsPublic.isChecked());
+                           }
                        }
                    })
                    .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
@@ -173,16 +198,18 @@ public class ContainersActivity extends ListActivity {
 	 * This broadcast receiver handles things after the containers have been loaded
 	 * in the backend.
 	 */
+    public String[] strContainers;
 	private BroadcastReceiver receiver = new BroadcastReceiver() {
 		public void onReceive(Context context, android.content.Intent intent) {
 			//Get a list of the container names and wire it up to the list view
 			List<Map<String,String>> containers = mStorageService.getLoadedContainers();			
-			String[] strContainers = new String[containers.size()];
+			strContainers = new String[containers.size()];
 			for (int i = 0; i < containers.size(); i ++) {
 				strContainers[i] = containers.get(i).get("ContainerName");
 			}			
 			ArrayAdapter<String> listAdapter = new ArrayAdapter<String>(mContext,
 	                android.R.layout.simple_list_item_1, strContainers);
+
 			setListAdapter(listAdapter);
             if (dialog.isShowing()) dialog.dismiss();
 		}

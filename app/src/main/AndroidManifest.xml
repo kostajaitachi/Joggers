@@ -23,11 +23,6 @@
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name" >
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
         <activity
             android:name=".ContainersActivity"
@@ -71,27 +66,36 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".Pedometer"
-            android:configChanges="orientation"
-            android:label="Pedometer" >
-        </activity>
-        <activity
-            android:name=".Settings"
+            android:name=".Statistics.Settings"
             android:label="@string/activity_settings" >
         </activity>
 
-        <service android:name=".StepService" />
+        <service android:name=".Statistics.StepService" />
 
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
         <meta-data
             android:name="com.google.android.maps.v2.API_KEY"
-            android:value="AIzaSyAUXnySEPSpNwnO-2_1nh2vJaEMc7F53E0" />
+            android:value="AIzaSyDi3nhhJPcrVZrzFUlAQse-DPg5UQxIvm8" />
 
         <activity
             android:name=".MapsActivity"
             android:label="@string/title_activity_maps" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="stanford.hackathon.joggers.MainActivity" />
+        </activity>
+        <activity
+            android:name=".SplashActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="Joggers"
+            android:theme="@style/FullscreenTheme" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
         </activity>
     </application>
 

@@ -10,6 +10,7 @@
 
         <TextView
             android:id="@+id/txtBlobName"
+            android:textAppearance="?android:attr/textAppearanceLarge"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
@@ -17,13 +18,5 @@
             android:ems="10" >
         </TextView>
     </RelativeLayout>
-
-    <Button
-        android:id="@+id/btnSelectImage"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:text="@string/select_image" />
-
 
 </LinearLayout>

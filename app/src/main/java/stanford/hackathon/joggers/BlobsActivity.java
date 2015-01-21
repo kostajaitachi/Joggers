@@ -29,6 +29,7 @@ import android.database.Cursor;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -61,14 +62,12 @@ public class BlobsActivity extends ListActivity {
 	private ActionMode mActionMode;
 	private int mSelectedBlobPosition;
 	private String mContainerName;
-	private Button btnPositiveDialog;
-	private TextView mTxtBlobName;
 	private Uri mImageUri;
-	private AlertDialog mAlertDialog;
     private  ProgressDialog dialog;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+        getListView().setBackgroundResource(R.drawable.back);
 		// Show the Up button in the action bar.
 		setupActionBar();
 		//Get access to the storage service
@@ -157,7 +156,11 @@ public class BlobsActivity extends ListActivity {
 			NavUtils.navigateUpFromSameTask(this);
 			return true;
 		case R.id.action_add_blob:
-
+            Intent intent=new Intent();
+            intent.setAction(Intent.ACTION_GET_CONTENT);
+            intent.setType("audio/mpeg");
+            startActivityForResult(Intent.createChooser(intent, "Choose an audio file"), 1111);
+            /*
 		      //Show new table dialog
 			AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
             // Get the layout inflater
@@ -192,7 +195,7 @@ public class BlobsActivity extends ListActivity {
 				public void onClick(View v) {
 					mStorageService.getSasForNewBlob(mContainerName, mTxtBlobName.getText().toString());
 				}
-			});
+			});*/
 		    break;
 		}
 		return super.onOptionsItemSelected(item);
@@ -242,6 +245,7 @@ public class BlobsActivity extends ListActivity {
 				(new MusicUploaderTask(sasUrl)).execute();
 			}
             if (dialog.isShowing()) dialog.dismiss();
+
 		}
 	};
 	
@@ -283,14 +287,7 @@ public class BlobsActivity extends ListActivity {
 	        mActionMode = null;
 	    }
 	};
-	
-	// Fire off intent to select image from gallery
- 	protected void selectSong() {
-        Intent intent=new Intent();
-        intent.setAction(Intent.ACTION_GET_CONTENT);
-        intent.setType("audio/mpeg");
-        startActivityForResult(Intent.createChooser(intent, "Choose an audio file"), 1111);
- 	}
+
 	 	
  	// Result handler for any intents started with startActivityForResult
  	@Override
@@ -305,7 +302,15 @@ public class BlobsActivity extends ListActivity {
                 cursor.moveToFirst();
                 String title = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DISPLAY_NAME));
                 title=title.substring(0,title.length()-4);
-                mTxtBlobName.setText(title);
+                char ar[] = title.toLowerCase().toCharArray();
+                title="";
+                for (int i = 0; i < ar.length; i++) {
+                    if (ar[i] < 90 || ar[i] > 122) ar[i] = '-';
+                    title+=ar[i];
+                    if(i>60)break;
+                }
+                if(title.length()<3)title+="Jog";
+                mStorageService.getSasForNewBlob(mContainerName,title.toString());
  			}
  		} catch (Exception ex) {
  			Log.e(TAG, ex.getMessage());
@@ -341,11 +346,13 @@ public class BlobsActivity extends ListActivity {
 	    protected Boolean doInBackground(Void... params) {	         
 	    	try {
 		    	Cursor cursor = getContentResolver().query(mImageUri, null,null, null, null);
-				cursor.moveToFirst();int index=0;
+				cursor.moveToFirst();
+                int index=0;
 				index = cursor.getColumnIndex(MediaStore.Images.Media.DATA);
                 title = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DISPLAY_NAME));
                 title=title.substring(0,title.length()-4);
                 dialog.setMessage("Uploading "+title);
+
 				String absoluteFilePath = cursor.getString(index);
 				FileInputStream fis = new FileInputStream(absoluteFilePath);
 				int bytesRead = 0;
@@ -391,39 +398,44 @@ public class BlobsActivity extends ListActivity {
                 latitude = location.getLatitude();
                 longitude = location.getLongitude();
             } else {
-                latitude = 78.34;
-                longitude = 17.23;
+                latitude = 17.23;
+                longitude = 78.35;
             }
             System.out.println("lat"+latitude);
         }
 	    @Override
 	    protected void onPostExecute(Boolean uploaded) {
-            if (dialog.isShowing()) dialog.dismiss();
-            if (uploaded) {
-                getLocation();
-                Item item = new Item();
-                item.Title = title;
-                item.lat = latitude;
-                item.lon = longitude;
-                try {
-                    MobileServiceClient mClient = new MobileServiceClient("https://joggers.azure-mobile.net/", "xNuXCWcFCMzhHBjAgncgVRppUyVONF71", getApplicationContext());
-                    mClient.getTable(Item.class).insert(item, new TableOperationCallback<Item>() {
-                        public void onCompleted(Item entity, Exception exception, ServiceFilterResponse response) {
-                            if (exception == null) {
-                                System.out.println("Success");
-                            } else {
-                                System.out.println("Nope" + exception);
+            try {
+                if (dialog.isShowing()) dialog.dismiss();
+                if (uploaded) {
+                    getLocation();
+                    Item item = new Item();
+                    item.title = title;
+                    item.playlist = mContainerName;
+                    item.lat = latitude;
+                    item.lon = longitude;
+                    SplashActivity.markerList.add(item);
+                    try {
+                        MobileServiceClient mClient = new MobileServiceClient("https://joggers.azure-mobile.net/", "xNuXCWcFCMzhHBjAgncgVRppUyVONF71", getApplicationContext());
+                        mClient.getTable(Item.class).insert(item, new TableOperationCallback<Item>() {
+                            public void onCompleted(Item entity, Exception exception, ServiceFilterResponse response) {
+                                if (exception == null) {
+                                    System.out.println("Success");
+                                } else {
+                                    System.out.println("Nope" + exception);
+                                }
                             }
-                        }
-                    });
-                } catch (MalformedURLException e) {
-                    Log.e(TAG, "There was an error creating the Mobile Service. Verify the URL");
-                }
-                mAlertDialog.cancel();
-                mStorageService.getBlobsForContainer(mContainerName);
-                Toast.makeText(getApplicationContext(), "Song uploaded!", Toast.LENGTH_LONG).show();
-            } else
-                Toast.makeText(getApplicationContext(), "Song couldn't uploaded!", Toast.LENGTH_LONG).show();
+                        });
+                    } catch (MalformedURLException e) {
+                        Log.e(TAG, "There was an error creating the Mobile Service. Verify the URL");
+                    }
+                    mStorageService.getBlobsForContainer(mContainerName);
+                    Toast.makeText(getApplicationContext(), "Song uploaded!", Toast.LENGTH_LONG).show();
+                    Intent intent = new Intent(BlobsActivity.this, MapsActivity.class);
+                    startActivity(intent);
+                } else
+                    Toast.makeText(getApplicationContext(), "Song couldn't uploaded!", Toast.LENGTH_LONG).show();
+            }catch(Exception e){}
         }
 
     }
