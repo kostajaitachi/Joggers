@@ -98,10 +98,10 @@ public class BlobDetailsActivity extends Activity {
     public void downloadSong(View v) {
         mStorageService.getBlobSas(mContainerName, mBlobName);
     }
-	//This class specifically handles fetching an image from a URL and setting
+	//This class specifically handles fetching a Song from a URL and setting
 	//the image view source on the screen
 	private class ImageFetcherTask extends AsyncTask<Void, Integer, Boolean> {
-	    private String mUrl,fUrl;
+	    private String mUrl;
         private final ProgressDialog dialog = new ProgressDialog(BlobDetailsActivity.this);
         @Override
         protected void onPreExecute(){
@@ -120,7 +120,7 @@ public class BlobDetailsActivity extends Activity {
 	    public ImageFetcherTask(String url) {
 	        mUrl = url;
 	    }
-
+String PATH="";
 	    @Override
 	    protected Boolean doInBackground(Void... params) {
 	        try {
@@ -131,7 +131,7 @@ public class BlobDetailsActivity extends Activity {
                     File cacheDir = new File(android.os.Environment.getExternalStorageDirectory(), "Joggers/"+mContainerName);
                     if (!cacheDir.exists())
                         cacheDir.mkdirs();
-                    fUrl=cacheDir.getAbsolutePath()+mBlobName+".mp3";
+                     PATH=cacheDir.getAbsolutePath();
                     File f = new File(cacheDir,mBlobName + ".mp3");
                     URL url = new URL(mUrl);
                     InputStream input = new BufferedInputStream(url.openStream());
@@ -164,6 +164,13 @@ public class BlobDetailsActivity extends Activity {
 	    @Override
 	    protected void onPostExecute(Boolean loaded) {
             dialog.dismiss();
+            try{
+                MediaPlayer mMediaPlayer = new MediaPlayer();
+                mMediaPlayer.setDataSource(PATH+"/"+mBlobName+".mp3");
+                mMediaPlayer.prepare();
+                mMediaPlayer.start();
+            }
+            catch(Exception e){System.out.println("Srujan"+e.toString());}
             /*AlertDialog.Builder builder = new AlertDialog.Builder(getApplicationContext());
             LayoutInflater inflater = ((Activity) getApplicationContext()).getLayoutInflater();
             View dialogView = inflater.inflate(R.layout.dialog_new_blob, null);
@@ -192,7 +199,7 @@ public class BlobDetailsActivity extends Activity {
                     });
             //Show the dialog
             builder.show();*/
-            Toast.makeText(getApplicationContext(), "Song downloaded at Joggers/" + mContainerName + "/" + mBlobName, Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), "Song downloaded at "+PATH, Toast.LENGTH_LONG).show();
 
         }
 	}

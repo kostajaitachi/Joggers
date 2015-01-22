@@ -230,23 +230,23 @@
         android:id="@+id/btnBlobStorage"
         android:src="@drawable/upload"
         android:scaleType="centerCrop"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        android:layout_below="@+id/linearLayout"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_above="@+id/btnMaps"
         android:layout_alignLeft="@+id/btnMaps"
         android:layout_alignStart="@+id/btnMaps" />
     <stanford.hackathon.joggers.shapes.CircleImageView
         android:id="@+id/btnMaps"
         android:src="@drawable/maps"
         android:scaleType="centerCrop"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        android:layout_marginBottom="76dp"
-        android:layout_alignParentBottom="true"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_marginLeft="40dp"
+        android:layout_marginStart="65dp"
+        android:layout_above="@+id/textView"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:layout_marginLeft="47dp"
-        android:layout_marginStart="47dp" />
+        android:layout_marginBottom="20dp" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -258,7 +258,8 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:layout_alignRight="@+id/linearLayout"
-        android:layout_alignEnd="@+id/linearLayout" />
+        android:layout_alignEnd="@+id/linearLayout"
+        android:id="@+id/textView" />
 
 
 </RelativeLayout>

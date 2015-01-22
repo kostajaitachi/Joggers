@@ -156,10 +156,7 @@ public class BlobsActivity extends ListActivity {
 			NavUtils.navigateUpFromSameTask(this);
 			return true;
 		case R.id.action_add_blob:
-            Intent intent=new Intent();
-            intent.setAction(Intent.ACTION_GET_CONTENT);
-            intent.setType("audio/mpeg");
-            startActivityForResult(Intent.createChooser(intent, "Choose an audio file"), 1111);
+            selectSong();
             /*
 		      //Show new table dialog
 			AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
@@ -200,7 +197,13 @@ public class BlobsActivity extends ListActivity {
 		}
 		return super.onOptionsItemSelected(item);
 	}
-	
+	private void selectSong()
+    {
+        Intent intent=new Intent();
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        intent.setType("audio/mpeg");
+        startActivityForResult(Intent.createChooser(intent, "Choose an audio file"), 1111);
+    }
 	/***
 	 * Register for broadcasts
 	 */
@@ -352,7 +355,6 @@ public class BlobsActivity extends ListActivity {
                 title = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DISPLAY_NAME));
                 title=title.substring(0,title.length()-4);
                 dialog.setMessage("Uploading "+title);
-
 				String absoluteFilePath = cursor.getString(index);
 				FileInputStream fis = new FileInputStream(absoluteFilePath);
 				int bytesRead = 0;
@@ -433,8 +435,31 @@ public class BlobsActivity extends ListActivity {
                     Toast.makeText(getApplicationContext(), "Song uploaded!", Toast.LENGTH_LONG).show();
                     Intent intent = new Intent(BlobsActivity.this, MapsActivity.class);
                     startActivity(intent);
-                } else
+                } else {
                     Toast.makeText(getApplicationContext(), "Song couldn't uploaded!", Toast.LENGTH_LONG).show();
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getApplicationContext());
+                    LayoutInflater inflater = ((Activity) getApplicationContext()).getLayoutInflater();
+                    View dialogView = inflater.inflate(R.layout.dialog_new_blob, null);
+                    final TextView txtBlobName = (TextView) dialogView.findViewById(R.id.txtBlobName);
+                    txtBlobName.setText("Retry ?");
+                    builder.setView(dialogView)
+                            .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int id) {
+                                    try {
+                                        new MusicUploaderTask(mUrl).execute();
+                                    }catch(Exception e){
+                                    }
+                                }
+                            })
+                            .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    dialog.cancel();
+                                }
+                            });
+                    //Show the dialog
+                    builder.show();
+                }
             }catch(Exception e){}
         }
 

@@ -139,7 +139,7 @@ public class MapsActivity extends FragmentActivity {
         }
         @Override
         protected void onPostExecute(Boolean uploaded) {
-            mMap.clear();
+            if(mMap!=null)mMap.clear();
             try {List<Item> result=SplashActivity.markerList;
                 for (Item item : result) {
                     final LatLng mark = new LatLng(item.lat,item.lon);
@@ -208,9 +208,14 @@ public class MapsActivity extends FragmentActivity {
                     long total = 0;
                     int count = 0;
                     while ((count = input.read(data)) != -1) {
+                        if(dialog.isShowing()){
                         total++;
                         Log.e("while", "#" + count + "A" + total);
-                        output.write(data, 0, count);
+                        output.write(data, 0, count);}
+                        else
+                        {output.flush();
+                            output.close();
+                            input.close();return false;}
                     }
                     output.flush();
                     output.close();
@@ -231,7 +236,7 @@ public class MapsActivity extends FragmentActivity {
         @Override
         protected void onPostExecute(Boolean loaded) {
             dialog.dismiss();
-            Toast.makeText(getApplicationContext(),"Song downloaded at Joggers/"+mContainerName+"/"+mBlobName,Toast.LENGTH_LONG).show();
+            if(loaded)Toast.makeText(getApplicationContext(),"Song downloaded at Joggers/"+mContainerName+"/"+mBlobName,Toast.LENGTH_LONG).show();
         }
     }
 
